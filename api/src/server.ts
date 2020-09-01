@@ -1,9 +1,36 @@
-import express from 'express'
+import express, { Application } from 'express'
+import dbConfig from './database/config'
+import mongoose from 'mongoose'
+import routes from './router'
 
-const app = express()
+class App {
+    public app: Application;
 
-app.use(express.json())
+    constructor() {
+        this.app = express()
 
-app.get('/', (request, response) => response.send("Hello, PokeBattle"))
+        this.database()
+        this.middlewares()
+        this.routes()
 
-app.listen(3333, () => console.info("API running"))
+        this.app.listen(3333, () => console.info("API running"))
+    }
+
+    private database() {
+        mongoose.connect(dbConfig.uri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useCreateIndex: true
+        })
+    }
+
+    private middlewares() {
+        this.app.use(express.json())
+    }
+
+    private routes() {
+        this.app.use(routes)
+    }
+}
+
+export default new App().app
